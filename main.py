@@ -24,11 +24,17 @@ def give_a_kudo(ack, command, client, say, respond):
     sender_id = command["user_id"]
     txt = command["text"]
 
-    usr_match = re.search(r"<@([A-Za-z0-9]+>)", txt)
 
-    if usr_match:
-        recipient_id = usr_match.group(1)
-        reason = txt.replace(usr_match.group(0), "").strip()
+
+    usr_match = re.search(r"<@([A-Za-z0-9]+)\|[^>]+>", txt)
+
+    if not usr_match:
+        respond("Please mention a user to give kudos to.")
+        return
+
+
+    recipient_id = usr_match.group(1)
+    reason = txt.replace(usr_match.group(0), "").strip()
 
     if not reason:
         reason = "being an awesome person!"
@@ -38,11 +44,10 @@ def give_a_kudo(ack, command, client, say, respond):
             channel=recipient_id,
             text=f":neocat_heart: You recieved a kudo from <@{sender_id}> Here is the reason why! {reason}"
         )
-        respond(f"I have sucessfully sent a kudo to <@{recipient_id}!")
+        respond(f"I have sucessfully sent a kudo to <@{recipient_id}>!")
     except Exception as e:
-        say(f"Oops! Unable to send a kudo to the recipient. :( {e}")
-    else:
-        respond("Please mention a user to give kudos to.")
+        respond(f"Oops! Unable to send a kudo to the recipient. :( {e}")
+
 
     
 
