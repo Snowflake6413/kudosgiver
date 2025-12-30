@@ -3,15 +3,34 @@ import re
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
-
+MODERATION_URL = os.getenv("MODERATION_URL")
+MODERATION_KEY = os.getenv("MODERATION_KEY")
 
 app=App(token=SLACK_BOT_TOKEN)
 
+mod_client=OpenAI(
+    base_url=MODERATION_URL,
+    api_key=MODERATION_KEY
+)
+
+
+def if_txt_flagged(text):
+
+    if not text:
+        return False
+    
+    try:
+        response = mod_client.moderations.create(input=text)
+        return response.results[0].flagged
+    except Exception as e:
+        print(f"Moderation API error {e}")
+        return True
 
 @app.message("kudos")
 def hello_fella(ack, say):
@@ -38,6 +57,10 @@ def give_a_kudo(ack, command, client, say, respond):
 
     if not reason:
         reason = "being an awesome person!"
+
+    if if_txt_flagged(reason):
+        respond(":neocat_0_0: This message has been flagged by our moderation system. Please rewrite your message!")
+        return
     
     try:
         client.chat_postMessage(
@@ -107,15 +130,20 @@ def kudo_shortcut_modal(ack, shortcut, client):
 
 @app.view("submit_kudos_view")
 def handle_submission(ack, client, body, view):
-    ack()
-    
-    recipient_id = view["private_metadata"]
-    sender_id = body["user"]["id"]
-
     reason= view["state"]["values"]["reason_block"]["reason_action"]["value"]
 
     if not reason:
         reason = "being awesome!"
+
+    if if_txt_flagged(reason):
+        ack(response_action="errors", errors={
+            "reason_block": "This message has been flagged by our moderation system. Please rewrite your message."
+        })
+        return
+    
+    ack()
+    recipient_id = view["private_metadata"]
+    sender_id = body["user"]["id"]
 
     try:
         client.chat_postMessage(
