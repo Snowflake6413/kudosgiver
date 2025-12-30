@@ -19,15 +19,34 @@ def hello_fella(ack, say):
     say("kudos to you too")
 
 @app.command("/give-kudos")
-def give_a_kudo(ack, command, client, say):
+def give_a_kudo(ack, command, client, say, respond):
     ack()
     sender_id = command["user_id"]
     txt = command["text"]
 
-    usr_match = re.search(r"<@[A-Za-z0-9]+>")
+    usr_match = re.search(r"<@([A-Za-z0-9]+>)", txt)
 
-    if match:
-        recipient_id = usr_match.group()
+    if usr_match:
+        recipient_id = usr_match.group(1)
+        reason = txt.replace(usr_match.group(0), "").strip()
+
+    if not reason:
+        reason = "being an awesome person!"
+    
+    try:
+        client.chat_postMessage(
+            channel=recipient_id,
+            text=f":neocat_heart: You recieved a kudo from <@{sender_id}> Here is the reason why! {reason}"
+        )
+        respond(f"I have sucessfully sent a kudo to <@{recipient_id}!")
+    except Exception as e:
+        say(f"Oops! Unable to send a kudo to the recipient. :( {e}")
+    else:
+        respond("Please mention a user to give kudos to.")
+
+    
+
+
 
 
 
