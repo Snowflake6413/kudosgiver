@@ -49,9 +49,81 @@ def give_a_kudo(ack, command, client, say, respond):
         respond(f"Oops! Unable to send a kudo to the recipient. :( {e}")
 
 
+
+@app.shortcut("give_kudos_shortcut")
+def kudo_shortcut_modal(ack, shortcut, client):
+    ack()
+
+    trigger_id = shortcut["trigger_id"]
+    recipient_id = shortcut["message"]["user"]
+
+    client.views_open(
+        trigger_id=trigger_id,
+        view={
+	"type": "modal",
+    "callback_id" : "submit_kudos_view",
+    "private_metadata" : recipient_id,
+	"title": {
+		"type": "plain_text",
+		"text": "KudosGiver",
+		"emoji": True
+	},
+	"submit": {
+		"type": "plain_text",
+		"text": "Give Kudos",
+		"emoji": True
+	},
+	"close": {
+		"type": "plain_text",
+		"text": "Cancel",
+		"emoji": True
+	},
+	"blocks": [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": f"*You are about to give a kudos to <@{recipient_id}>*"
+			}
+		},
+		{
+			"type": "input",
+            "block_id" : "reason_block",
+			"element": {
+				"type": "plain_text_input",
+				"action_id": "reason_action"
+			},
+			"label": {
+				"type": "plain_text",
+				"text": "Reason",
+				"emoji": True
+			},
+			"optional": True
+		}
+	]
+}
+    )
+
+
+@app.view("submit_kudos_view")
+def handle_submission(ack, client, body, view):
+    ack()
     
+    recipient_id = view["private_metadata"]
+    sender_id = body["user"]["id"]
 
+    reason= view["state"]["values"]["reason_block"]["reason_action"]["value"]
 
+    if not reason:
+        reason = "being awesome!"
+
+    try:
+        client.chat_postMessage(
+            channel=recipient_id,
+            text=f":neocat_heart: You recieved a kudo from <@{sender_id}> Here is the reason why! {reason}"
+        )
+    except Exception as e:
+        print(f"Error sending the kudos! {e}")
 
 
 
