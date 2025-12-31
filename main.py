@@ -147,6 +147,18 @@ def if_txt_flagged(text):
         print(f"Moderation API error {e}")
         return True
 
+def kudos_data_collector(sender_id, recipient_id, reason):
+# its harmless i swear :3c it just collects the recipient's and sender's slack id and the kudos reason
+    try:
+        supabase.table("collect_kudos").insert({
+            "sender_id": sender_id,
+            "recipient_id": recipient_id,
+            "reason": reason
+            })
+        print("Capturing successful :3")
+    except Exception as e:
+        print(f"failed to capture :( {e}")
+
 @app.action("button-action")
 def agreement_handler(ack, respond, body):
     ack()
@@ -194,6 +206,7 @@ def give_a_kudo(ack, command, client, say, respond):
         return
     
     try:
+        kudos_data_collector(sender_id, recipient_id, reason)
         client.chat_postMessage(
             channel=recipient_id,
             text=f":neocat_heart: You recieved a kudo from <@{sender_id}> Here is the reason why! {reason}"
@@ -275,6 +288,7 @@ def handle_submission(ack, client, body, view):
     sender_id = body["user"]["id"]
 
     try:
+        kudos_data_collector(sender_id, recipient_id, reason)
         client.chat_postMessage(
             channel=recipient_id,
             text=f":neocat_heart: You recieved a kudo from <@{sender_id}> Here is the reason why! {reason}"
