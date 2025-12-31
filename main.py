@@ -228,7 +228,7 @@ def opt_in_cmd(ack, respond, command):
     ack()
     user_id = command["user_id"]
 
-    if not check_if_opt_out(user_id):
+    if check_if_opt_out(user_id):
         respond(text=":neocat_cute: You are already opted in! ", replace_original=False)
         return
     
@@ -612,7 +612,7 @@ def handle_submission(ack, client, body, view):
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f":neocat_heart: *You received kudos back from <@{sender_id}>*\n\n> {reason}"
+                "text": f":neocat_heart: *You received kudos from <@{sender_id}>*\n\n> {reason}"
             }
         },
         {
@@ -622,7 +622,7 @@ def handle_submission(ack, client, body, view):
                     "type": "button",
                     "text": {
                         "type": "plain_text",
-                        "text": "Return the favor (again) :neocat_hug:",
+                        "text": "Return the favor :neocat_hug:",
                         "emoji": True
                     },
                     "value": sender_id,
