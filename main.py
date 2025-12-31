@@ -393,11 +393,11 @@ def hello_fella(ack, say):
 def give_a_kudo(ack, command, client, say, respond):
     ack()
     sender_id = command["user_id"]
-    recipient_id = usr_match.group(1)
 
     
     if sender_id == recipient_id:
         respond(text='You cannot give kudos to yourself. :neocat_laugh:')
+        return
 
     if check_if_opt_out(sender_id):
         respond(text="You have opted out from this kudos system. You are unable to send kudos. To opt-in again, run /opt-in. :neocat_baa:", replace_original=False)
@@ -414,6 +414,9 @@ def give_a_kudo(ack, command, client, say, respond):
 
 
     usr_match = re.search(r"<@([A-Za-z0-9]+)\|[^>]+>", txt)
+
+    recipient_id = usr_match.group(1)
+
 
     if not usr_match:
         respond("Please mention a user to give kudos to.")
