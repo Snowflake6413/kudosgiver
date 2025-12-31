@@ -197,6 +197,7 @@ def agreement_handler(ack, respond, body):
 
 @app.command("/opt-out")
 def opt_out_cmd(ack, command, respond):
+    ack()
     user_id = command["user_id"]
 
     if check_if_opt_out(user_id):
