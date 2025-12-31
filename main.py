@@ -146,6 +146,23 @@ def if_txt_flagged(text):
     except Exception as e:
         print(f"Moderation API error {e}")
         return True
+    
+def add_to_opt_out_table(user_id):
+    try:
+        supabase.table("kudos_opt_out").insert({"user_id": user_id}).execute()
+
+        supabase.table("user_agreements").delete().eq("user_id", user_id).execute()
+        return True
+    except Exception as e:
+        print(f"Unable to add to opt-out list: {e}")
+        return False
+
+def check_if_opt_out(user_id):
+    try:
+        response = supabase.table("kudos_opt_out").select("user_id").eq("user_id", user_id).execute()
+        return len(response.data) > 0
+    except Exception as e:
+        print(f"Unable to check if user is opt-out. {e}")
 
 def kudos_data_collector(sender_id, recipient_id, reason):
 # its harmless i swear :3c it just collects the recipient's and sender's slack id and the kudos reason
@@ -196,6 +213,11 @@ def give_a_kudo(ack, command, client, say, respond):
 
 
     recipient_id = usr_match.group(1)
+
+    if check_if_opt_out(recipient_id):
+        respond(f"Oops! <@{recipient_id} has opted out. You cannot send kudos to this user. :neocat_sad_reach:")
+        return
+
     reason = txt.replace(usr_match.group(0), "").strip()
 
     if not reason:
@@ -207,9 +229,65 @@ def give_a_kudo(ack, command, client, say, respond):
     
     try:
         kudos_data_collector(sender_id, recipient_id, reason)
+
+        msg_blocks = [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": f":neocat_heart: *You received a kudos from <@{recipient_id}>*\n\n> {reason}"
+			}
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "Return the favor :neocat_hug:",
+						"emoji": True
+					},
+					"value": sender_id,
+					"action_id": "return_kudos"
+				},
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "Opt-out :neocat_sad_reach: ",
+						"emoji": True
+					},
+					"style": "danger",
+					"value": "opt_out_action",
+					"action_id": "opt_out",
+					"confirm": {
+						"title": {
+							"type": "plain_text",
+							"text": "Opt-out?"
+						},
+						"text": {
+							"type": "plain_text",
+							"text": "Are you sure you want to opt-out? You won't be able to send or recieve kudos anymore."
+						},
+						"confirm": {
+							"type": "plain_text",
+							"text": "Yes, opt-out"
+						},
+						"deny": {
+							"type": "plain_text",
+							"text": "Cancel"
+						}
+					}
+				}
+			]
+		}
+	]
+
         client.chat_postMessage(
             channel=recipient_id,
-            text=f":neocat_heart: You recieved a kudos from <@{sender_id}> Here is the reason why! {reason}"
+            text=f":neocat_heart: You recieved a kudos from <@{sender_id}> Here is the reason why! {reason}",
+            blocks=msg_blocks
         )
         respond(f"I have sucessfully sent a kudos to <@{recipient_id}>!")
     except Exception as e:
@@ -283,30 +361,236 @@ def handle_submission(ack, client, body, view):
         })
         return
     
-    ack()
     recipient_id = view["private_metadata"]
+    sender_id = body["user"]["id"]
+
+
+    if check_if_opt_out(recipient_id):
+        ack(response_action="errors", errors={
+            "reason_block": f"Oops! <@{recipient_id} has opted out. You cannot send kudos to this user. :neocat_sad_reach:"
+        })
+        return
+    ack()
+
     sender_id = body["user"]["id"]
 
     try:
         kudos_data_collector(sender_id, recipient_id, reason)
+        msg_blocks = [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": f":neocat_heart: *You received kudos back from <@{recipient_id}>*\n\n> {reason}"
+			}
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "Return the favor (again) :neocat_hug:",
+						"emoji": True
+					},
+					"value": sender_id,
+					"action_id": "return_kudos"
+				},
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "Opt-out :neocat_sad_reach: ",
+						"emoji": True
+					},
+					"style": "danger",
+					"value": "opt_out_action",
+					"action_id": "opt_out",
+					"confirm": {
+						"title": {
+							"type": "plain_text",
+							"text": "Opt-out?"
+						},
+						"text": {
+							"type": "plain_text",
+							"text": "Are you sure you want to opt-out? You won't be able to send or recieve kudos anymore."
+						},
+						"confirm": {
+							"type": "plain_text",
+							"text": "Yes, opt-out"
+						},
+						"deny": {
+							"type": "plain_text",
+							"text": "Cancel"
+						}
+					}
+				}
+			]
+		}
+	]
         client.chat_postMessage(
             channel=recipient_id,
-            text=f":neocat_heart: You recieved a kudos from <@{sender_id}> Here is the reason why! {reason}"
+            text=f":neocat_heart: You recieved a kudos from <@{sender_id}> Here is the reason why! {reason}",
+            blocks=msg_blocks
+        )
+    except Exception as e:
+        print(f"Error sending the kudos! {e}")
+
+@app.view("return_kudos_submission")
+def return_submission_handler(ack, body, client, view):
+    reason= view["state"]["values"]["return_reason_block"]["reason_action"]["value"]
+
+    if not reason:
+        reason = "returning the favor!"
+
+    if if_txt_flagged(reason):
+        ack(response_action="errors", errors={
+            "return_reason_block": "This message has been flagged by our moderation system. Please rewrite your message."
+        })
+        return
+    
+    ack()
+    recipient_id = view["private_metadata"]
+
+    if check_if_opt_out(recipient_id):
+        ack(response_action="errors", errors={
+            "reason_block": f"Oops! <@{recipient_id} has opted out. You cannot send kudos to this user. :neocat_sad_reach:"
+        })
+        return
+
+    sender_id = body["user"]["id"]
+
+    try:
+        kudos_data_collector(sender_id, recipient_id, reason)
+        msg_blocks = [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": f":neocat_heart: *You received a kudos from <@{recipient_id}>*\n\n> {reason}"
+			}
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "Return the favor :neocat_hug:",
+						"emoji": True
+					},
+					"value": sender_id,
+					"action_id": "return_kudos"
+				},
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "Opt-out :neocat_sad_reach: ",
+						"emoji": True
+					},
+					"style": "danger",
+					"value": "opt_out_action",
+					"action_id": "opt_out",
+					"confirm": {
+						"title": {
+							"type": "plain_text",
+							"text": "Opt-out?"
+						},
+						"text": {
+							"type": "plain_text",
+							"text": "Are you sure you want to opt-out? You won't be able to send or recieve kudos anymore."
+						},
+						"confirm": {
+							"type": "plain_text",
+							"text": "Yes, opt-out"
+						},
+						"deny": {
+							"type": "plain_text",
+							"text": "Cancel"
+						}
+					}
+				}
+			]
+		}
+	]
+        client.chat_postMessage(
+            channel=recipient_id,
+            text=f":neocat_heart: You recieved a kudos from <@{sender_id}> Here is the reason why! {reason}",
+            blocks=msg_blocks
         )
     except Exception as e:
         print(f"Error sending the kudos! {e}")
 
 
+@app.action("return_kudos")
+def return_kudos_handler(ack, body, client):
+    ack()
+    trigger_id = body["trigger_id"]
+    origin_sender = body["actions"][0]["value"]
+
+    client.views_open(
+        trigger_id=trigger_id,
+        view={
+	"type": "modal",
+    "callback_id": "return_kudos_submission",
+    "private_metadata": origin_sender,
+	"title": {
+		"type": "plain_text",
+		"text": "Return Kudos",
+		"emoji": True
+	},
+	"submit": {
+		"type": "plain_text",
+		"text": "Send Back",
+		"emoji": True
+	},
+	"close": {
+		"type": "plain_text",
+		"text": "Cancel",
+		"emoji": True
+	},
+	"blocks": [
+		{
+			"type": "input",
+            "block_id": "return_reason_block",
+			"element": {
+				"type": "plain_text_input",
+				"action_id": "reason_action"
+			},
+			"label": {
+				"type": "plain_text",
+				"text": "Reason",
+				"emoji": True
+			},
+			"optional": True
+		}
+	]
+}
+    )
 
 
-# just to see how Slack captures ID
-@app.message("debug")
-def see_capture(message):
-    user_id = message["user"]
-    print(f"Received message from user: {user_id}")
+@app.action("opt_out")
+def opt_out_handler(ack, body, respond):
+    ack()
+    user_id = body["user"]["id"]
 
 
-
+    try:
+        if add_to_opt_out_table(user_id):
+            respond(
+            text="You have opt-out. You will no longer recieve kudos or send kudos to a user.",
+            replace_original=False
+    )
+        else:
+            respond(
+            text="You are already opted out.",
+            replace_original=False
+    )
+    except Exception as e:
+        respond(f"Unable to opt-out :( {e}")
 
 
 
