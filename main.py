@@ -4,6 +4,7 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from dotenv import load_dotenv
 from openai import OpenAI
+from supabase import create_client, Client
 
 load_dotenv()
 
@@ -11,6 +12,11 @@ SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
 MODERATION_URL = os.getenv("MODERATION_URL")
 MODERATION_KEY = os.getenv("MODERATION_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app=App(token=SLACK_BOT_TOKEN)
 
@@ -18,6 +24,115 @@ mod_client=OpenAI(
     base_url=MODERATION_URL,
     api_key=MODERATION_KEY
 )
+
+
+def check_usr_agreement(user_id):
+    try:
+        response = supabase.table("user_agreements").select("user_id").eq("user_id", user_id).execute()
+        return len(response.data) > 0
+    except Exception as e:
+        print(f"Supabase err {e}")
+        return False
+
+def save_usr_agreement(user_id):
+    try:
+        supabase.table("user_agreements").insert({"user_id": user_id}).execute()
+        return True
+    except Exception as e:
+        print(f"Unable to save : {e}")
+
+def get_rules_block():
+    return[
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": ":neocat_book: *Community Guidelines*"
+			}
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "Before you send your first kudos to your buddy, please follow these rules and reminders!",
+				"emoji": True
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "1. Be respectful!",
+				"emoji": True
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "2. No inappropriate content. Moderation is in place.",
+				"emoji": True
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "3. Kudos's messages will be logged for safety.",
+				"emoji": True
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "4. Please follow the <https://hack.af/coc|Code of Conduct> when sending kudos!"
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "Note on our collection policy: Your Slack ID and timestamp will be logged when you agreed to these guidelines. This information will be saved into a Supabase table. We will also collect your Slack ID, the recipient's Slack ID and the kudos reason into a seperate Supabase table. We use this information for safety purposes. If any Fire Department member asks for this information, we'll gladly hand it over to them. If you want your data to be removed, please DM <@U09PHG7RLGG>.",
+				"emoji": True
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "Please note that the moderation system is powered by OpenAI models. It not might be accurate and some harmful messages might slip through. If you encounter any harmful messages, please file a Shroud report or contact a FD member.",
+				"emoji": True
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "By agreeing to these guidelines, you allow us to collect the information listed in our collection policy.",
+				"emoji": True
+			}
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "I agree to the above.",
+						"emoji": True
+					},
+					"value": "agree_button",
+					"action_id": "button-action"
+				}
+			]
+		}
+	]
+
 
 
 def if_txt_flagged(text):
@@ -32,6 +147,16 @@ def if_txt_flagged(text):
         print(f"Moderation API error {e}")
         return True
 
+@app.action("button_action")
+def agreement_handler(ack, respond, body):
+    ack()
+    user_id = body["user"]["id"]
+    
+    if save_usr_agreement(user_id):
+        respond(text="Thank you for agreeing! You can now send kudos! :neocat_cute:", replace_original=True)
+    else:
+        respond(text="Error when saving the agreement. Please try again soon.", replace_original=True)
+
 @app.message("kudos")
 def hello_fella(ack, say):
     ack()
@@ -41,6 +166,12 @@ def hello_fella(ack, say):
 def give_a_kudo(ack, command, client, say, respond):
     ack()
     sender_id = command["user_id"]
+    if not check_usr_agreement(sender_id):
+        respond(
+            text="It looks like you havent agreed to our guidelines, please read it first!",
+            blocks=get_rules_block()
+        )
+        return
     txt = command["text"]
 
 
@@ -70,8 +201,6 @@ def give_a_kudo(ack, command, client, say, respond):
         respond(f"I have sucessfully sent a kudo to <@{recipient_id}>!")
     except Exception as e:
         respond(f"Oops! Unable to send a kudo to the recipient. :( {e}")
-
-
 
 @app.shortcut("give_kudos_shortcut")
 def kudo_shortcut_modal(ack, shortcut, client):
