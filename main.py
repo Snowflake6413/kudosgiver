@@ -356,6 +356,11 @@ def kudo_shortcut_modal(ack, shortcut, client):
 def handle_submission(ack, client, body, view):
     sender_id = body["user"]["id"]
 
+    if not check_usr_agreement(sender_id):
+        ack(response_action="errors", error={
+            "reason_block": "You haven't agreed to our guidelines! To use this service, run the /opt-in command."
+        })
+
     if check_if_opt_out(sender_id):
         ack(response_action="errors", error={
             "reason_block": "You have opted out and unable to send kudos. To opt-in, run the /opt-in command."
