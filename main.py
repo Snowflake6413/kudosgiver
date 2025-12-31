@@ -236,9 +236,15 @@ def hello_fella(ack, say):
 def give_a_kudo(ack, command, client, say, respond):
     ack()
     sender_id = command["user_id"]
+    recipient_id = usr_match.group(1)
+
+	
+    if sender_id == recipient_id:
+        respond(text='You cannot give kudos to yourself. :neocat_laugh:')
 
     if check_if_opt_out(sender_id):
         respond(text="You have opted out from this kudos system. You are unable to send kudos. To opt-in again, run /opt-in. :neocat_baa:", replace_original=False)
+        return
 
     if not check_usr_agreement(sender_id):
         respond(
@@ -257,7 +263,6 @@ def give_a_kudo(ack, command, client, say, respond):
         return
 
 
-    recipient_id = usr_match.group(1)
 
     if check_if_opt_out(recipient_id):
         respond(f"Oops! <@{recipient_id}> has opted out. You cannot send kudos to this user. :neocat_sad_reach:")
@@ -499,6 +504,13 @@ def handle_submission(ack, client, body, view):
 @app.view("return_kudos_submission")
 def return_submission_handler(ack, body, client, view):
     sender_id = body["user"]["id"]
+    recipient_id = view["private_metadata"]
+
+    if sender_id == recipient_id:
+        ack(response_action="errors", errors={
+            "reason_block": "You cannot give kudos to yourself!"
+            })
+        return
 
     if not check_usr_agreement(sender_id):
         ack(response_action="errors", errors={
