@@ -34,6 +34,20 @@ def check_usr_agreement(user_id):
         print(f"Supabase err {e}")
         return False
 
+def fetch_kudos_stats(user_id):
+    try:
+        sent_response = supabase.table("collect_kudos").select("id").eq("sender_id", user_id).execute()
+        sent_count = len(sent_response.data)
+    
+        recieved_response = supabase.table("collect_kudos").select("id").eq("recipient_id", user_id).execute()
+        recieved_count = len(recieved_response.data)
+
+        return sent_count, recieved_count
+    except Exception as e:
+        print(f"Error when fetching stats!")
+        return 0,0
+    
+
 def save_usr_agreement(user_id):
     try:
         supabase.table("user_agreements").insert({"user_id": user_id}).execute()
@@ -43,95 +57,95 @@ def save_usr_agreement(user_id):
 
 def get_rules_block():
     return[
-		{
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": ":neocat_book: *Community Guidelines*"
-			}
-		},
-		{
-			"type": "divider"
-		},
-		{
-			"type": "section",
-			"text": {
-				"type": "plain_text",
-				"text": "Before you send your first kudos to your buddy, please follow these rules and reminders!",
-				"emoji": True
-			}
-		},
-		{
-			"type": "section",
-			"text": {
-				"type": "plain_text",
-				"text": "1. Be respectful!",
-				"emoji": True
-			}
-		},
-		{
-			"type": "section",
-			"text": {
-				"type": "plain_text",
-				"text": "2. No inappropriate content. Moderation is in place.",
-				"emoji": True
-			}
-		},
-		{
-			"type": "section",
-			"text": {
-				"type": "plain_text",
-				"text": "3. Kudos's messages will be logged for safety.",
-				"emoji": True
-			}
-		},
-		{
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": "4. Please follow the <https://hack.af/coc|Code of Conduct> when sending kudos!"
-			}
-		},
-		{
-			"type": "section",
-			"text": {
-				"type": "plain_text",
-				"text": "Note on our collection policy: Your Slack ID and timestamp will be logged when you agreed to these guidelines. This information will be saved into a Supabase table. We will also collect your Slack ID, the recipient's Slack ID and the kudos reason into a seperate Supabase table. We use this information for safety purposes. If any Fire Department member asks for this information, we'll gladly hand it over to them. If you would like your data to be removed, please DM @areallyawesomeusername",
-				"emoji": True
-			}
-		},
-		{
-			"type": "section",
-			"text": {
-				"type": "plain_text",
-				"text": "Please note that the moderation system is powered by OpenAI models. It not might be accurate and some harmful messages might slip through. If you encounter any harmful messages, please file a Shroud report or contact a FD member.",
-				"emoji": True
-			}
-		},
-		{
-			"type": "section",
-			"text": {
-				"type": "plain_text",
-				"text": "By agreeing to these guidelines, you allow us to collect the information listed in our collection policy and will follow the guidelines above.",
-				"emoji": True
-			}
-		},
-		{
-			"type": "actions",
-			"elements": [
-				{
-					"type": "button",
-					"text": {
-						"type": "plain_text",
-						"text": "I agree to the above.",
-						"emoji": True
-					},
-					"value": "agree_button",
-					"action_id": "button-action"
-				}
-			]
-		}
-	]
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": ":neocat_book: *Community Guidelines*"
+            }
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "plain_text",
+                "text": "Before you send your first kudos to your buddy, please follow these rules and reminders!",
+                "emoji": True
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "plain_text",
+                "text": "1. Be respectful!",
+                "emoji": True
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "plain_text",
+                "text": "2. No inappropriate content. Moderation is in place.",
+                "emoji": True
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "plain_text",
+                "text": "3. Kudos's messages will be logged for safety.",
+                "emoji": True
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "4. Please follow the <https://hack.af/coc|Code of Conduct> when sending kudos!"
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "plain_text",
+                "text": "Note on our collection policy: Your Slack ID and timestamp will be logged when you agreed to these guidelines. This information will be saved into a Supabase table. We will also collect your Slack ID, the recipient's Slack ID and the kudos reason into a seperate Supabase table. We use this information for safety purposes. If any Fire Department member asks for this information, we'll gladly hand it over to them. If you would like your data to be removed, please DM @areallyawesomeusername",
+                "emoji": True
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "plain_text",
+                "text": "Please note that the moderation system is powered by OpenAI models. It not might be accurate and some harmful messages might slip through. If you encounter any harmful messages, please file a Shroud report or contact a FD member.",
+                "emoji": True
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "plain_text",
+                "text": "By agreeing to these guidelines, you allow us to collect the information listed in our collection policy and will follow the guidelines above.",
+                "emoji": True
+            }
+        },
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "I agree to the above.",
+                        "emoji": True
+                    },
+                    "value": "agree_button",
+                    "action_id": "button-action"
+                }
+            ]
+        }
+    ]
 
 
 
@@ -226,6 +240,58 @@ def opt_in_cmd(ack, respond, command):
     else:
         respond(text="Oops! Something went wrong while trying to opt you back in. Please try again later. :neocat_sad_reach:")
     
+@app.command("/my-kudos")
+def kudos_cmd(ack, command, respond):
+    ack()
+    user_id = command["user_id"]
+    
+    if check_if_opt_out:
+        respond(text="You have opted out and your unable to see your stats. Please opt-in to see your stats! :neocat_blank:")
+    
+    sent_count, recieved_count = fetch_kudos_stats(user_id)
+
+    stat_blocks = [
+        
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "Your Kudos Stats! :neocat_heart:",
+				"emoji": True
+			}
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*Kudos Sent:*\n{sent_count}"
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*Kudos Received:*\n{received_count}"
+			}
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": "Keep on sending kudos!",
+					"emoji": True
+				}
+			]
+		}
+	]
+    respond(blocks=stat_blocks)
 
 @app.message("kudos")
 def hello_fella(ack, say):
@@ -238,7 +304,7 @@ def give_a_kudo(ack, command, client, say, respond):
     sender_id = command["user_id"]
     recipient_id = usr_match.group(1)
 
-	
+    
     if sender_id == recipient_id:
         respond(text='You cannot give kudos to yourself. :neocat_laugh:')
 
@@ -281,58 +347,58 @@ def give_a_kudo(ack, command, client, say, respond):
         kudos_data_collector(sender_id, recipient_id, reason)
 
         msg_blocks = [
-		{
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": f":neocat_heart: *You received a kudos from <@{sender_id}>*\n\n> {reason}"
-			}
-		},
-		{
-			"type": "actions",
-			"elements": [
-				{
-					"type": "button",
-					"text": {
-						"type": "plain_text",
-						"text": "Return the favor :neocat_hug:",
-						"emoji": True
-					},
-					"value": sender_id,
-					"action_id": "return_kudos"
-				},
-				{
-					"type": "button",
-					"text": {
-						"type": "plain_text",
-						"text": "Opt-out :neocat_sad_reach: ",
-						"emoji": True
-					},
-					"style": "danger",
-					"value": "opt_out_action",
-					"action_id": "opt_out",
-					"confirm": {
-						"title": {
-							"type": "plain_text",
-							"text": "Opt-out?"
-						},
-						"text": {
-							"type": "plain_text",
-							"text": "Are you sure you want to opt-out? You won't be able to send or recieve kudos anymore."
-						},
-						"confirm": {
-							"type": "plain_text",
-							"text": "Yes, opt-out"
-						},
-						"deny": {
-							"type": "plain_text",
-							"text": "Cancel"
-						}
-					}
-				}
-			]
-		}
-	]
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f":neocat_heart: *You received a kudos from <@{sender_id}>*\n\n> {reason}"
+            }
+        },
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Return the favor :neocat_hug:",
+                        "emoji": True
+                    },
+                    "value": sender_id,
+                    "action_id": "return_kudos"
+                },
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Opt-out :neocat_sad_reach: ",
+                        "emoji": True
+                    },
+                    "style": "danger",
+                    "value": "opt_out_action",
+                    "action_id": "opt_out",
+                    "confirm": {
+                        "title": {
+                            "type": "plain_text",
+                            "text": "Opt-out?"
+                        },
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Are you sure you want to opt-out? You won't be able to send or recieve kudos anymore."
+                        },
+                        "confirm": {
+                            "type": "plain_text",
+                            "text": "Yes, opt-out"
+                        },
+                        "deny": {
+                            "type": "plain_text",
+                            "text": "Cancel"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
 
         client.chat_postMessage(
             channel=recipient_id,
@@ -353,47 +419,47 @@ def kudo_shortcut_modal(ack, shortcut, client):
     client.views_open(
         trigger_id=trigger_id,
         view={
-	"type": "modal",
+    "type": "modal",
     "callback_id" : "submit_kudos_view",
     "private_metadata" : recipient_id,
-	"title": {
-		"type": "plain_text",
-		"text": "KudosGiver",
-		"emoji": True
-	},
-	"submit": {
-		"type": "plain_text",
-		"text": "Give Kudos",
-		"emoji": True
-	},
-	"close": {
-		"type": "plain_text",
-		"text": "Cancel",
-		"emoji": True
-	},
-	"blocks": [
-		{
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": f"*You are about to give a kudos to <@{recipient_id}>*"
-			}
-		},
-		{
-			"type": "input",
+    "title": {
+        "type": "plain_text",
+        "text": "KudosGiver",
+        "emoji": True
+    },
+    "submit": {
+        "type": "plain_text",
+        "text": "Give Kudos",
+        "emoji": True
+    },
+    "close": {
+        "type": "plain_text",
+        "text": "Cancel",
+        "emoji": True
+    },
+    "blocks": [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*You are about to give a kudos to <@{recipient_id}>*"
+            }
+        },
+        {
+            "type": "input",
             "block_id" : "reason_block",
-			"element": {
-				"type": "plain_text_input",
-				"action_id": "reason_action"
-			},
-			"label": {
-				"type": "plain_text",
-				"text": "Reason",
-				"emoji": True
-			},
-			"optional": True
-		}
-	]
+            "element": {
+                "type": "plain_text_input",
+                "action_id": "reason_action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Reason",
+                "emoji": True
+            },
+            "optional": True
+        }
+    ]
 }
     )
 
@@ -441,58 +507,58 @@ def handle_submission(ack, client, body, view):
     try:
         kudos_data_collector(sender_id, recipient_id, reason)
         msg_blocks = [
-		{
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": f":neocat_heart: *You received kudos back from <@{sender_id}>*\n\n> {reason}"
-			}
-		},
-		{
-			"type": "actions",
-			"elements": [
-				{
-					"type": "button",
-					"text": {
-						"type": "plain_text",
-						"text": "Return the favor (again) :neocat_hug:",
-						"emoji": True
-					},
-					"value": sender_id,
-					"action_id": "return_kudos"
-				},
-				{
-					"type": "button",
-					"text": {
-						"type": "plain_text",
-						"text": "Opt-out :neocat_sad_reach: ",
-						"emoji": True
-					},
-					"style": "danger",
-					"value": "opt_out_action",
-					"action_id": "opt_out",
-					"confirm": {
-						"title": {
-							"type": "plain_text",
-							"text": "Opt-out?"
-						},
-						"text": {
-							"type": "plain_text",
-							"text": "Are you sure you want to opt-out? You won't be able to send or recieve kudos anymore."
-						},
-						"confirm": {
-							"type": "plain_text",
-							"text": "Yes, opt-out"
-						},
-						"deny": {
-							"type": "plain_text",
-							"text": "Cancel"
-						}
-					}
-				}
-			]
-		}
-	]
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f":neocat_heart: *You received kudos back from <@{sender_id}>*\n\n> {reason}"
+            }
+        },
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Return the favor (again) :neocat_hug:",
+                        "emoji": True
+                    },
+                    "value": sender_id,
+                    "action_id": "return_kudos"
+                },
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Opt-out :neocat_sad_reach: ",
+                        "emoji": True
+                    },
+                    "style": "danger",
+                    "value": "opt_out_action",
+                    "action_id": "opt_out",
+                    "confirm": {
+                        "title": {
+                            "type": "plain_text",
+                            "text": "Opt-out?"
+                        },
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Are you sure you want to opt-out? You won't be able to send or recieve kudos anymore."
+                        },
+                        "confirm": {
+                            "type": "plain_text",
+                            "text": "Yes, opt-out"
+                        },
+                        "deny": {
+                            "type": "plain_text",
+                            "text": "Cancel"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
         client.chat_postMessage(
             channel=recipient_id,
             text=f":neocat_heart: You recieved a kudos from <@{sender_id}> Here is the reason why! {reason}",
@@ -552,58 +618,58 @@ def return_submission_handler(ack, body, client, view):
     try:
         kudos_data_collector(sender_id, recipient_id, reason)
         msg_blocks = [
-		{
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": f":neocat_heart: *You received a kudos from <@{sender_id}>*\n\n> {reason}"
-			}
-		},
-		{
-			"type": "actions",
-			"elements": [
-				{
-					"type": "button",
-					"text": {
-						"type": "plain_text",
-						"text": "Return the favor :neocat_hug:",
-						"emoji": True
-					},
-					"value": sender_id,
-					"action_id": "return_kudos"
-				},
-				{
-					"type": "button",
-					"text": {
-						"type": "plain_text",
-						"text": "Opt-out :neocat_sad_reach: ",
-						"emoji": True
-					},
-					"style": "danger",
-					"value": "opt_out_action",
-					"action_id": "opt_out",
-					"confirm": {
-						"title": {
-							"type": "plain_text",
-							"text": "Opt-out?"
-						},
-						"text": {
-							"type": "plain_text",
-							"text": "Are you sure you want to opt-out? You won't be able to send or recieve kudos anymore."
-						},
-						"confirm": {
-							"type": "plain_text",
-							"text": "Yes, opt-out"
-						},
-						"deny": {
-							"type": "plain_text",
-							"text": "Cancel"
-						}
-					}
-				}
-			]
-		}
-	]
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f":neocat_heart: *You received a kudos from <@{sender_id}>*\n\n> {reason}"
+            }
+        },
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Return the favor :neocat_hug:",
+                        "emoji": True
+                    },
+                    "value": sender_id,
+                    "action_id": "return_kudos"
+                },
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Opt-out :neocat_sad_reach: ",
+                        "emoji": True
+                    },
+                    "style": "danger",
+                    "value": "opt_out_action",
+                    "action_id": "opt_out",
+                    "confirm": {
+                        "title": {
+                            "type": "plain_text",
+                            "text": "Opt-out?"
+                        },
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Are you sure you want to opt-out? You won't be able to send or recieve kudos anymore."
+                        },
+                        "confirm": {
+                            "type": "plain_text",
+                            "text": "Yes, opt-out"
+                        },
+                        "deny": {
+                            "type": "plain_text",
+                            "text": "Cancel"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
         client.chat_postMessage(
             channel=recipient_id,
             text=f":neocat_heart: You recieved a kudos from <@{sender_id}> Here is the reason why! {reason}",
@@ -622,40 +688,40 @@ def return_kudos_handler(ack, body, client):
     client.views_open(
         trigger_id=trigger_id,
         view={
-	"type": "modal",
+    "type": "modal",
     "callback_id": "return_kudos_submission",
     "private_metadata": origin_sender,
-	"title": {
-		"type": "plain_text",
-		"text": "Return Kudos",
-		"emoji": True
-	},
-	"submit": {
-		"type": "plain_text",
-		"text": "Send Back",
-		"emoji": True
-	},
-	"close": {
-		"type": "plain_text",
-		"text": "Cancel",
-		"emoji": True
-	},
-	"blocks": [
-		{
-			"type": "input",
+    "title": {
+        "type": "plain_text",
+        "text": "Return Kudos",
+        "emoji": True
+    },
+    "submit": {
+        "type": "plain_text",
+        "text": "Send Back",
+        "emoji": True
+    },
+    "close": {
+        "type": "plain_text",
+        "text": "Cancel",
+        "emoji": True
+    },
+    "blocks": [
+        {
+            "type": "input",
             "block_id": "return_reason_block",
-			"element": {
-				"type": "plain_text_input",
-				"action_id": "reason_action"
-			},
-			"label": {
-				"type": "plain_text",
-				"text": "Reason",
-				"emoji": True
-			},
-			"optional": True
-		}
-	]
+            "element": {
+                "type": "plain_text_input",
+                "action_id": "reason_action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Reason",
+                "emoji": True
+            },
+            "optional": True
+        }
+    ]
 }
     )
 
