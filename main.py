@@ -156,6 +156,15 @@ def add_to_opt_out_table(user_id):
     except Exception as e:
         print(f"Unable to add to opt-out list: {e}")
         return False
+    
+
+def remove_from_opt_out_table(user_id):
+    try:
+        supabase.table("kudos_opt_out").delete().eq("user_id", user_id).execute()
+        return True
+    except Exception as e:
+        print(f"Unable to remove from opt-out list: {e}")
+        return False
 
 def check_if_opt_out(user_id):
     try:
@@ -185,6 +194,37 @@ def agreement_handler(ack, respond, body):
         respond(text="Thank you for agreeing! You can now send kudos! :neocat_cute:", replace_original=True)
     else:
         respond(text="Error when saving the agreement. Please try again soon.", replace_original=True)
+
+@app.command("/opt-out")
+def opt_out_cmd(ack, command, respond):
+    user_id = command["user_id"]
+
+    if check_if_opt_out(user_id):
+        respond(text="You have already opted out!", replace_original=False)
+        return
+    
+    if add_to_opt_out_table(user_id):
+        respond(text="You have opt-out. You will no longer recieve kudos or send kudos to a user. :neocat_sad_reach:", replace_original=False)
+    else:
+        respond("Error when trying to opt-out. Please try again.")
+
+@app.command("/opt-in")
+def opt_in_cmd(ack, respond, command):
+    ack()
+    user_id = command["user_id"]
+
+    if not check_if_opt_out(user_id):
+        respond(text=":neocat_cute: You are already opted in! ", replace_original=False)
+        return
+    
+    if remove_from_opt_out_table(user_id):
+        respond(
+            text=":neocat_box: Welcome back! You've successfully opted in. To start sending kudos again, please review and agree to the guidelines below!",
+            blocks=get_rules_block()
+        )
+    else:
+        respond(text="Oops! Something went wrong while trying to opt you back in. Please try again later. :neocat_sad_reach:")
+    
 
 @app.message("kudos")
 def hello_fella(ack, say):
