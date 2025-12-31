@@ -215,7 +215,7 @@ def give_a_kudo(ack, command, client, say, respond):
     recipient_id = usr_match.group(1)
 
     if check_if_opt_out(recipient_id):
-        respond(f"Oops! <@{recipient_id} has opted out. You cannot send kudos to this user. :neocat_sad_reach:")
+        respond(f"Oops! <@{recipient_id}> has opted out. You cannot send kudos to this user. :neocat_sad_reach:")
         return
 
     reason = txt.replace(usr_match.group(0), "").strip()
@@ -235,7 +235,7 @@ def give_a_kudo(ack, command, client, say, respond):
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": f":neocat_heart: *You received a kudos from <@{recipient_id}>*\n\n> {reason}"
+				"text": f":neocat_heart: *You received a kudos from <@{sender_id}>*\n\n> {reason}"
 			}
 		},
 		{
@@ -381,7 +381,7 @@ def handle_submission(ack, client, body, view):
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": f":neocat_heart: *You received kudos back from <@{recipient_id}>*\n\n> {reason}"
+				"text": f":neocat_heart: *You received kudos back from <@{sender_id}>*\n\n> {reason}"
 			}
 		},
 		{
@@ -468,7 +468,7 @@ def return_submission_handler(ack, body, client, view):
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": f":neocat_heart: *You received a kudos from <@{recipient_id}>*\n\n> {reason}"
+				"text": f":neocat_heart: *You received a kudos from <@{sender_id}>*\n\n> {reason}"
 			}
 		},
 		{
