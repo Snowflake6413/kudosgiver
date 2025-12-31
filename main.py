@@ -195,6 +195,10 @@ def hello_fella(ack, say):
 def give_a_kudo(ack, command, client, say, respond):
     ack()
     sender_id = command["user_id"]
+
+    if check_if_opt_out(sender_id):
+        respond(text="You have opted out from this kudos system. You are unable to send kudos. To opt-in again, run /opt-in. :neocat_baa:", replace_original=False)
+
     if not check_usr_agreement(sender_id):
         respond(
             text="It looks like you havent agreed to our guidelines, please read it first!",
@@ -350,6 +354,14 @@ def kudo_shortcut_modal(ack, shortcut, client):
 
 @app.view("submit_kudos_view")
 def handle_submission(ack, client, body, view):
+    sender_id = body["user"]["id"]
+
+    if check_if_opt_out(sender_id):
+        ack(response_action="errors", error={
+            "reason_block": "You have opted out and unable to send kudos. To opt-in, run the /opt-in command."
+        })
+        return
+    
     reason= view["state"]["values"]["reason_block"]["reason_action"]["value"]
 
     if not reason:
@@ -362,7 +374,7 @@ def handle_submission(ack, client, body, view):
         return
     
     recipient_id = view["private_metadata"]
-    sender_id = body["user"]["id"]
+    
 
 
     if check_if_opt_out(recipient_id):
@@ -439,7 +451,16 @@ def handle_submission(ack, client, body, view):
 
 @app.view("return_kudos_submission")
 def return_submission_handler(ack, body, client, view):
+    sender_id = body["user"]["id"]
+    if check_if_opt_out(sender_id):
+            ack(response_action="errors", error={
+                "reason_block": "You have opted out and unable to send kudos. To opt-in, run the /opt-in command."
+            })
+            return
+    
     reason= view["state"]["values"]["return_reason_block"]["reason_action"]["value"]
+
+    
 
     if not reason:
         reason = "returning the favor!"
@@ -459,7 +480,7 @@ def return_submission_handler(ack, body, client, view):
         })
         return
 
-    sender_id = body["user"]["id"]
+    
 
     try:
         kudos_data_collector(sender_id, recipient_id, reason)
