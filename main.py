@@ -335,7 +335,7 @@ def kudos_cmd(ack, command, respond):
     ack()
     user_id = command["user_id"]
     
-    if check_if_opt_out:
+    if not check_if_opt_out:
         respond(text="You have opted out and your unable to see your stats. Please opt-in to see your stats! :neocat_blank:")
         return
     
@@ -365,7 +365,7 @@ def kudos_cmd(ack, command, respond):
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": f"*Kudos Received:*\n{received_count}"
+				"text": f"*Kudos Received:*\n{recieved_count}"
 			}
 		},
 		{
