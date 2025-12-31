@@ -360,6 +360,7 @@ def handle_submission(ack, client, body, view):
         ack(response_action="errors", errors={
             "reason_block": "You haven't agreed to our guidelines! To use this service, run the /opt-in command."
         })
+        return
 
     if check_if_opt_out(sender_id):
         ack(response_action="errors", errors={
