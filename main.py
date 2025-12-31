@@ -239,6 +239,96 @@ def opt_in_cmd(ack, respond, command):
         )
     else:
         respond(text="Oops! Something went wrong while trying to opt you back in. Please try again later. :neocat_sad_reach:")
+
+@app.command("/help")
+def help_cmd(ack, respond):
+    ack()
+
+    help_blocks = [
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "KudosGiver Help :neocat_book: ",
+				"emoji": True
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "/give-kudos @User Reason",
+				"emoji": True
+			}
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": "Give kudos to a friend!",
+					"emoji": True
+				}
+			]
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "/opt-out",
+				"emoji": True
+			}
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": "Opt-out of the kudos system. :neocat_sad:",
+					"emoji": True
+				}
+			]
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "/opt-in",
+				"emoji": True
+			}
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": "Opt-in of the kudos system.",
+					"emoji": True
+				}
+			]
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "/my-kudos",
+				"emoji": True
+			}
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": "Check how many kudos you recieved and sent!",
+					"emoji": True
+				}
+			]
+		}
+	]
+
+    respond(blocks=help_blocks)
+
     
 @app.command("/my-kudos")
 def kudos_cmd(ack, command, respond):
