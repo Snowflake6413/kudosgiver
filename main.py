@@ -240,7 +240,7 @@ def opt_in_cmd(ack, respond, command):
     else:
         respond(text="Oops! Something went wrong while trying to opt you back in. Please try again later. :neocat_sad_reach:")
 
-@app.command("/help")
+@app.command("/kudos-help")
 def help_cmd(ack, respond):
     ack()
 
