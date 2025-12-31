@@ -16,6 +16,7 @@ You can give kudos to your friends! Check stats and give back kudos to your frie
 * /opt-in (Opt-in of the kudos system)
 * /opt-out (Opt-out of the kudos system)
 * /my-kudos (Check your stats)
+* /kudos-help (Check what commands are available. hint hint: they are listed above)
 
 
 ## Prerequisites
