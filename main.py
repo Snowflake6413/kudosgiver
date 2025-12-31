@@ -337,6 +337,7 @@ def kudos_cmd(ack, command, respond):
     
     if check_if_opt_out:
         respond(text="You have opted out and your unable to see your stats. Please opt-in to see your stats! :neocat_blank:")
+        return
     
     sent_count, recieved_count = fetch_kudos_stats(user_id)
 
@@ -357,14 +358,14 @@ def kudos_cmd(ack, command, respond):
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": "*Kudos Sent:*\n{sent_count}"
+				"text": f"*Kudos Sent:*\n{sent_count}"
 			}
 		},
 		{
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": "*Kudos Received:*\n{received_count}"
+				"text": f"*Kudos Received:*\n{received_count}"
 			}
 		},
 		{
