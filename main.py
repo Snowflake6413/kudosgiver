@@ -209,11 +209,11 @@ def give_a_kudo(ack, command, client, say, respond):
         kudos_data_collector(sender_id, recipient_id, reason)
         client.chat_postMessage(
             channel=recipient_id,
-            text=f":neocat_heart: You recieved a kudo from <@{sender_id}> Here is the reason why! {reason}"
+            text=f":neocat_heart: You recieved a kudos from <@{sender_id}> Here is the reason why! {reason}"
         )
-        respond(f"I have sucessfully sent a kudo to <@{recipient_id}>!")
+        respond(f"I have sucessfully sent a kudos to <@{recipient_id}>!")
     except Exception as e:
-        respond(f"Oops! Unable to send a kudo to the recipient. :( {e}")
+        respond(f"Oops! Unable to send a kudos to the recipient. :( {e}")
 
 @app.shortcut("give_kudos_shortcut")
 def kudo_shortcut_modal(ack, shortcut, client):
@@ -291,7 +291,7 @@ def handle_submission(ack, client, body, view):
         kudos_data_collector(sender_id, recipient_id, reason)
         client.chat_postMessage(
             channel=recipient_id,
-            text=f":neocat_heart: You recieved a kudo from <@{sender_id}> Here is the reason why! {reason}"
+            text=f":neocat_heart: You recieved a kudos from <@{sender_id}> Here is the reason why! {reason}"
         )
     except Exception as e:
         print(f"Error sending the kudos! {e}")
