@@ -201,7 +201,7 @@ def give_a_kudo(ack, command, client, say, respond):
 
     if not check_usr_agreement(sender_id):
         respond(
-            text="It looks like you havent agreed to our guidelines, please read it first!",
+            text="It looks like you haven't agreed to our guidelines, please read it first!",
             blocks=get_rules_block()
         )
         return
@@ -458,6 +458,14 @@ def handle_submission(ack, client, body, view):
 @app.view("return_kudos_submission")
 def return_submission_handler(ack, body, client, view):
     sender_id = body["user"]["id"]
+
+    if not check_usr_agreement(sender_id):
+        ack(response_action="errors", errors={
+            "reason_block": "You haven't agreed to our guidelines! To use this service, run the /opt-in command."
+            })
+        return
+
+
     if check_if_opt_out(sender_id):
             ack(response_action="errors", errors={
                 "reason_block": "You have opted out and unable to send kudos. To opt-in, run the /opt-in command."
