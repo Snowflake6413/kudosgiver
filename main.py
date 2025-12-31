@@ -502,11 +502,20 @@ def give_a_kudo(ack, command, client, say, respond):
         respond(f"Oops! Unable to send a kudos to the recipient. :( {e}")
 
 @app.shortcut("give_kudos_shortcut")
-def kudo_shortcut_modal(ack, shortcut, client):
+def kudo_shortcut_modal(ack, shortcut, client, body):
     ack()
 
     trigger_id = shortcut["trigger_id"]
     recipient_id = shortcut["message"]["user"]
+    sender_id = body["user"]["id"]
+
+    if sender_id == recipient_id:
+        client.chat_postEphemeral(
+            channel=body["channel"]["id"],
+            user=sender_id,
+            text="You cannot give kudos to yourself! :neocat_laugh:"
+        )
+        return
 
     client.views_open(
         trigger_id=trigger_id,
