@@ -384,10 +384,7 @@ def kudos_cmd(ack, command, respond):
 	]
     respond(blocks=stat_blocks)
 
-@app.message("kudos")
-def hello_fella(ack, say):
-    ack()
-    say("kudos to you too")
+
 
 @app.command("/give-kudos")
 def give_a_kudo(ack, command, client, say, respond):
