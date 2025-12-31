@@ -147,7 +147,7 @@ def if_txt_flagged(text):
         print(f"Moderation API error {e}")
         return True
 
-@app.action("button_action")
+@app.action("button-action")
 def agreement_handler(ack, respond, body):
     ack()
     user_id = body["user"]["id"]
