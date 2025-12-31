@@ -395,10 +395,6 @@ def give_a_kudo(ack, command, client, say, respond):
     sender_id = command["user_id"]
 
     
-    if sender_id == recipient_id:
-        respond(text='You cannot give kudos to yourself. :neocat_laugh:')
-        return
-
     if check_if_opt_out(sender_id):
         respond(text="You have opted out from this kudos system. You are unable to send kudos. To opt-in again, run /opt-in. :neocat_baa:", replace_original=False)
         return
@@ -415,14 +411,16 @@ def give_a_kudo(ack, command, client, say, respond):
 
     usr_match = re.search(r"<@([A-Za-z0-9]+)\|[^>]+>", txt)
 
+    if not usr_match:
+            respond("Please mention a user to give kudos to.")
+            return
+    
     recipient_id = usr_match.group(1)
 
 
-    if not usr_match:
-        respond("Please mention a user to give kudos to.")
+    if sender_id == recipient_id:
+        respond(text='You cannot give kudos to yourself. :neocat_laugh:')
         return
-
-
 
     if check_if_opt_out(recipient_id):
         respond(f"Oops! <@{recipient_id}> has opted out. You cannot send kudos to this user. :neocat_sad_reach:")
