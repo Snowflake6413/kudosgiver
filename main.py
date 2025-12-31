@@ -154,7 +154,7 @@ def kudos_data_collector(sender_id, recipient_id, reason):
             "sender_id": sender_id,
             "recipient_id": recipient_id,
             "reason": reason
-            })
+            }).execute()
         print("Capturing successful :3")
     except Exception as e:
         print(f"failed to capture :( {e}")
