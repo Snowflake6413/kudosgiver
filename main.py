@@ -96,7 +96,7 @@ def get_rules_block():
 			"type": "section",
 			"text": {
 				"type": "plain_text",
-				"text": "Note on our collection policy: Your Slack ID and timestamp will be logged when you agreed to these guidelines. This information will be saved into a Supabase table. We will also collect your Slack ID, the recipient's Slack ID and the kudos reason into a seperate Supabase table. We use this information for safety purposes. If any Fire Department member asks for this information, we'll gladly hand it over to them. If you want your data to be removed, please DM <@U09PHG7RLGG>.",
+				"text": "Note on our collection policy: Your Slack ID and timestamp will be logged when you agreed to these guidelines. This information will be saved into a Supabase table. We will also collect your Slack ID, the recipient's Slack ID and the kudos reason into a seperate Supabase table. We use this information for safety purposes. If any Fire Department member asks for this information, we'll gladly hand it over to them. If you would like your data to be removed, please DM @areallyawesomeusername",
 				"emoji": True
 			}
 		},
@@ -112,7 +112,7 @@ def get_rules_block():
 			"type": "section",
 			"text": {
 				"type": "plain_text",
-				"text": "By agreeing to these guidelines, you allow us to collect the information listed in our collection policy.",
+				"text": "By agreeing to these guidelines, you allow us to collect the information listed in our collection policy and will follow the guidelines above.",
 				"emoji": True
 			}
 		},
